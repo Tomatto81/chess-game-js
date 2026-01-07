@@ -1,0 +1,343 @@
+/* =========================================================
+   RESET & GLOBAL
+========================================================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box; 
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center; 
+  justify-content: center; 
+  min-height: 100vh; 
+  overflow-x: hidden;
+  background: url(images/background.jpg);
+  position: relative;
+}
+
+
+/* =========================================================
+   MAIN LAYOUT
+========================================================= */
+.main-content-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+#gameContainer {
+  display: flex;
+  flex-direction: row; 
+  align-items: flex-start;
+  gap: 30px; 
+  transform: translateX(185px);
+}
+
+#chessBoard {
+  margin: 0;
+}
+
+
+/* =========================================================
+   HEADER / TITLE
+========================================================= */
+#main-title {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  font-size: 1.5rem;
+  color: black;
+  border: 2px solid black;
+  padding: 8px;
+  background-color: gray;
+  border-radius: 5px;
+}
+
+
+/* =========================================================
+   TURN INDICATOR
+========================================================= */
+#tog {
+  margin: 0 0 15px 0; 
+  font-size: 1.2rem; 
+  text-align: center; 
+  background-color: #fff;
+  color: #000;
+  border: 2px solid #fff;
+  padding: 8px;
+  border-radius: 5px;
+  width: fit-content;
+}
+
+
+/* =========================================================
+   MOVE LOG PANEL
+========================================================= */
+#moveLog {
+  background-color: rgba(255, 255, 255, 0.9);
+  border: 2px solid #333;
+  border-radius: 5px;
+  padding: 10px;
+  width: 200px;
+  max-height: 480px;
+  overflow-y: auto;
+  color: #333;
+  font-size: 0.9rem;
+  text-align: left;
+}
+
+#moveLog h3 {
+  margin: 0 0 5px 0;
+  text-align: left;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 5px;
+}
+
+#movesList {
+  padding-left: 20px;
+  text-align: left;
+}
+
+#movesList li {
+  list-style: decimal;
+  margin-bottom: 2px;
+  font-size: 0.9rem;
+  display: list-item;
+  text-align: left;
+  place-items: initial;
+}
+
+
+/* =========================================================
+   BUTTONS
+========================================================= */
+#reset-btn {
+  background-color: #4caf58;
+  border: none;
+  color: white;
+  padding: 10px 15px;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 5px;
+  min-width: 100px;
+  display: block;
+}
+
+
+/* =========================================================
+   BOARD STRUCTURE
+========================================================= */
+.container {
+  display: grid;
+  place-items: center;
+  justify-content: center;
+}
+
+.div {
+  display: flex;
+}
+
+ul {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+li {
+  list-style: none;
+  display: grid;
+  place-items: center;
+  font-size: 0;
+}
+
+
+/* =========================================================
+   CHESS SQUARES
+========================================================= */
+.box {
+  margin: 0.5px;
+  width: 60px; 
+  height: 60px;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: default;
+  position: relative;
+}
+
+.box[style*="pointer"] {
+  cursor: pointer;
+}
+
+.box.selected {
+  background-color: pink !important;
+}
+
+
+/* =========================================================
+   BOARD NOTATION (RANK & FILE)
+========================================================= */
+.box::before,
+.box::after {
+  position: absolute;
+  font-size: 10px;
+  font-weight: bold;
+  color: #000;
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+.box::before {
+  top: 1px;
+  left: 3px;
+}
+
+.box::after {
+  bottom: 1px;
+  right: 3px;
+}
+
+.box[data-rank]::before {
+  content: attr(data-rank);
+}
+
+.box[data-file]::after {
+  content: attr(data-file);
+}
+
+
+/* =========================================================
+   CHESS PIECES
+========================================================= */
+.all-img {
+  width: 50px; 
+  height: 50px;
+  pointer-events: none;
+}
+
+.all-pawn {
+  transform: scale(0.9);
+}
+
+
+/* =========================================================
+   MODAL
+========================================================= */
+.modal {
+  position: fixed;
+  z-index: 100;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7); 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal.hidden {
+  display: none;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 15px; 
+  border-radius: 10px;
+  text-align: center;
+  border: 3px solid #333;
+  min-width: 250px; 
+}
+
+#modalText {
+  margin-bottom: 15px; 
+  color: #333;
+}
+
+#modalButtons button {
+  padding: 8px 16px; 
+  margin: 4px; 
+  font-size: 14px; 
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+}
+
+.btn-primary {
+  background-color: #4caf50;
+  color: white;
+}
+
+.btn-secondary {
+  background-color: #f44336;
+  color: white;
+}
+
+.btn-neutral {
+  background-color: #555;
+  color: white;
+}
+
+
+/* =========================================================
+   RESPONSIVE - TABLET & MOBILE
+========================================================= */
+@media (max-width: 768px) {
+  body {
+    justify-content: flex-start;
+  }
+
+  #main-title {
+    position: relative;
+    top: 0;
+    left: 0;
+    margin: 20px auto; 
+  }
+
+  #gameContainer {
+    transform: translateX(0); 
+    flex-direction: column; 
+    align-items: center;
+    gap: 15px;
+  }
+
+  #moveLog {
+    width: 90%; 
+    max-height: 150px; 
+  }
+
+  #reset-btn {
+    width: 150px; 
+  }
+
+  .box {
+    width: 11vw;
+    height: 11vw;
+  }
+
+  .all-img {
+    width: 9vw;
+    height: 9vw;
+  }
+
+  #tog {
+    margin: 20px 0 10px 0;
+    font-size: 18px;
+  }
+
+  .box::before,
+  .box::after {
+    font-size: 8px; 
+  }
+}
+
+@media (max-width: 400px) {
+  #main-title {
+    font-size: 1.2rem;
+    padding: 5px;
+  }
+}
