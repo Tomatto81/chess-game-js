@@ -25,5 +25,3 @@ This chess game is built with a strong focus on accurate rule implementation:
 * **HTML5:** Main structure for the chessboard and game elements.
 * **CSS3:** Styling for the board, pieces, and a responsive layout.
 * **JavaScript (ES6+):** All game logic, move generation, rule validation, and state management.
-
-## ⚙️ Project Structure
