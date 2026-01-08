@@ -472,8 +472,24 @@ function checkForCheckOrCheckmate(fenToCheck) {
     showThreefoldChoice();
   }
 
-  const isMyKingChecked = isPositionUnderAttack(myKingPos, opponentColor);
+  
   let hasLegalMoves = false;
+
+  for (let r = 1; r <= 8; r += 1) {
+    for (let c = 1; c <= 8; c += 1) {
+      const box = document.getElementById(`b${r}${c}`);
+      if (box.dataset.piece && box.dataset.piece.startsWith(myColor)) {
+        const moves = getValidMoves(box.dataset.piece, box.id, true); 
+        if (moves.length > 0) {
+          hasLegalMoves = true;
+          r = 9;
+          break; 
+        }
+      }
+    }
+  }
+
+  const isMyKingChecked = isPositionUnderAttack(myKingPos, opponentColor);
 
   if (isMyKingChecked) {
     if (!hasLegalMoves) {
@@ -484,20 +500,6 @@ function checkForCheckOrCheckmate(fenToCheck) {
       warning.innerText = `${myColor === 'W' ? 'White' : 'Black'} is in Check!`;
     }
   } else {
-    hasLegalMoves = false;
-    for (let i = 1; i <= 8; i += 1) {
-      for (let j = 1; j <= 8; j += 1) {
-        const box = document.getElementById(`b${i}${j}`);
-        if (box.dataset.piece && box.dataset.piece.startsWith(myColor)) {
-          const moves = getValidMoves(box.dataset.piece, box.id, true);
-          if (moves.length > 0) {
-            hasLegalMoves = true;
-            break;
-          }
-        }
-      }
-      if (hasLegalMoves) break;
-    }
     if (!hasLegalMoves) {
       endGame('Stalemate! Draw.');
     }
