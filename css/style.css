@@ -14,7 +14,7 @@ body {
   justify-content: center;
   min-height: 100vh;
   overflow-x: hidden;
-  background: url(images/background.jpg);
+  background: url(../images/background.jpg);
   position: relative;
 }
 
@@ -65,8 +65,6 @@ body {
   transform: rotate(180deg);
 }
 
-
-/* Notation Container */
 #rankNotation {
   grid-area: rank;
   display: flex;
@@ -95,21 +93,20 @@ body {
   color: #000;
 }
 
-/* Control notation order using CSS only */
 #chessBoardContainer:not(.flipped) #rankNotation {
-  flex-direction: column; /* Top to bottom: 1,2,3,4,5,6,7,8 */
+  flex-direction: column;
 }
 
 #chessBoardContainer.flipped #rankNotation {
-  flex-direction: column; /* Top to bottom: 8,7,6,5,4,3,2,1 */
+  flex-direction: column;
 }
 
 #chessBoardContainer:not(.flipped) #fileNotation {
-  flex-direction: row; /* Left to right: a,b,c,d,e,f,g,h */
+  flex-direction: row;
 }
 
 #chessBoardContainer.flipped #fileNotation {
-  flex-direction: row; /* Left to right: h,g,f,e,d,c,b,a */
+  flex-direction: row;
 }
 
 
@@ -298,6 +295,30 @@ li {
   min-width: 250px;
 }
 
+.promotion-choice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px;
+  border: 2px solid #ddd;
+  border-radius: 5px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 80px;
+}
+
+.promotion-choice:hover {
+  border-color: #4CAF50;
+  background-color: #f8fff8;
+  transform: scale(1.05);
+}
+
+.promotion-choice.active {
+  border-color: #4CAF50;
+  background-color: #e8f5e9;
+}
+
 #modalText {
   margin-bottom: 15px;
   color: #333;
@@ -310,6 +331,14 @@ li {
   cursor: pointer;
   border: none;
   border-radius: 5px;
+}
+
+#promotionOptions {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap;
+  margin: 20px 0;
 }
 
 .btn-primary {
@@ -368,6 +397,16 @@ li {
   .notation-item {
     width: 11vw;
     height: 11vw;
+  }
+
+  .promotion-choice {
+    min-width: 70px;
+    padding: 8px;
+  }
+  
+  .promotion-choice img {
+    width: 35px;
+    height: 35px;
   }
 
   #moveLog {
