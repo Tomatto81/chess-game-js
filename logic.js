@@ -8,18 +8,21 @@ let isModalOpen = false;
 let isBoardActive = false;
 let playerColor = 'W';
 let computerColor = 'B';
-let castlingRights = { W: { kingSide: true, queenSide: true }, B: { kingSide: true, queenSide: true } };
+let castlingRights = {
+  W: { kingSide: true, queenSide: true },
+  B: { kingSide: true, queenSide: true },
+};
 let fullMoveNumber = 1;
 
 document.addEventListener('DOMContentLoaded', () => {
   coloring();
   initializeBoard();
-  createNotations(); 
+  createNotations();
   disableBoard();
-  
+
   const initialPositionKey = generatePositionKey();
   positionHistory[initialPositionKey] = 1;
-  
+
   setupEventListeners();
 });
 
@@ -27,13 +30,13 @@ function setupEventListeners() {
   document.querySelectorAll('.box').forEach((box) => {
     box.addEventListener('click', handleBoxClick);
   });
-  
+
   document.getElementById('reset-btn').addEventListener('click', startNewGame);
   document.getElementById('closeModal').addEventListener('click', closeModal);
   document.getElementById('chooseWhite').addEventListener('click', () => chooseColor('W'));
   document.getElementById('chooseBlack').addEventListener('click', () => chooseColor('B'));
   document.getElementById('chooseRandom').addEventListener('click', chooseRandomColor);
-  
+
   document.getElementById('gameModal').addEventListener('click', (e) => {
     if (e.target === document.getElementById('gameModal')) {
       closeModal();
@@ -43,9 +46,9 @@ function setupEventListeners() {
 
 function handleBoxClick() {
   if (!isBoardActive || isGameOver || isModalOpen || currentTurn !== playerColor) return;
-  
+
   const isTargetValid = this.style.backgroundColor === 'greenyellow';
-  
+
   if (!selectedPiece) {
     if (this.dataset.piece && this.dataset.piece.startsWith(currentTurn)) {
       selectedPiece = this;
@@ -55,26 +58,33 @@ function handleBoxClick() {
     const startId = selectedPiece.id;
     const targetId = this.id;
     const pieceType = selectedPiece.dataset.piece;
-    
+
     const moveStatus = movePiece(selectedPiece, this);
     const promotedPiece = checkPawnPromotion(this);
-    
-    const moveNotation = generateSAN(startId, targetId, pieceType, moveStatus.isCapture, moveStatus.isCastling, promotedPiece);
+
+    const moveNotation = generateSAN(
+      startId,
+      targetId,
+      pieceType,
+      moveStatus.isCapture,
+      moveStatus.isCastling,
+      promotedPiece
+    );
     updateMoveLog(moveNotation);
-    
+
     currentTurn = currentTurn === 'W' ? 'B' : 'W';
     updateTurnDisplay();
-    
+
     if (currentTurn === 'W') fullMoveNumber += 1;
-    
+
     selectedPiece = null;
     clearHighlights();
-    
+
     const positionKey = generatePositionKey();
     positionHistory[positionKey] = (positionHistory[positionKey] || 0) + 1;
-    
+
     const gameEnded = checkForCheckOrCheckmate(positionKey);
-    
+
     if (!gameEnded && currentTurn === computerColor) {
       setTimeout(makeComputerMove, 500);
     }
@@ -105,12 +115,12 @@ function startNewGame() {
   isGameOver = false;
   isBoardActive = false;
   disableBoard();
-  document.getElementById('tog').innerText = "Choose your color";
+  document.getElementById('tog').innerText = 'Choose your color';
 }
 
 function initializeGame() {
   resetBoard();
-  
+
   if (playerColor === 'B') {
     flipBoard();
     currentTurn = 'W';
@@ -121,28 +131,28 @@ function initializeGame() {
     currentTurn = 'W';
     updateTurnDisplay();
   }
-  
+
   isBoardActive = true;
   enableBoard();
 }
 
 function resetBoard() {
   const pieces = {
-    'b81': 'Brook', 'b82': 'Bknight', 'b83': 'Bbishop', 'b84': 'Bqueen',
-    'b85': 'Bking', 'b86': 'Bbishop', 'b87': 'Bknight', 'b88': 'Brook',
-    'b71': 'Bpawn', 'b72': 'Bpawn', 'b73': 'Bpawn', 'b74': 'Bpawn',
-    'b75': 'Bpawn', 'b76': 'Bpawn', 'b77': 'Bpawn', 'b78': 'Bpawn',
-    'b61': '', 'b62': '', 'b63': '', 'b64': '', 'b65': '', 'b66': '', 'b67': '', 'b68': '',
-    'b51': '', 'b52': '', 'b53': '', 'b54': '', 'b55': '', 'b56': '', 'b57': '', 'b58': '',
-    'b41': '', 'b42': '', 'b43': '', 'b44': '', 'b45': '', 'b46': '', 'b47': '', 'b48': '',
-    'b31': '', 'b32': '', 'b33': '', 'b34': '', 'b35': '', 'b36': '', 'b37': '', 'b38': '',
-    'b21': 'Wpawn', 'b22': 'Wpawn', 'b23': 'Wpawn', 'b24': 'Wpawn',
-    'b25': 'Wpawn', 'b26': 'Wpawn', 'b27': 'Wpawn', 'b28': 'Wpawn',
-    'b11': 'Wrook', 'b12': 'Wknight', 'b13': 'Wbishop', 'b14': 'Wqueen',
-    'b15': 'Wking', 'b16': 'Wbishop', 'b17': 'Wknight', 'b18': 'Wrook'
+    b81: 'Brook', b82: 'Bknight', b83: 'Bbishop', b84: 'Bqueen',
+    b85: 'Bking', b86: 'Bbishop', b87: 'Bknight', b88: 'Brook',
+    b71: 'Bpawn', b72: 'Bpawn', b73: 'Bpawn', b74: 'Bpawn',
+    b75: 'Bpawn', b76: 'Bpawn', b77: 'Bpawn', b78: 'Bpawn',
+    b61: '', b62: '', b63: '', b64: '', b65: '', b66: '', b67: '', b68: '',
+    b51: '', b52: '', b53: '', b54: '', b55: '', b56: '', b57: '', b58: '',
+    b41: '', b42: '', b43: '', b44: '', b45: '', b46: '', b47: '', b48: '',
+    b31: '', b32: '', b33: '', b34: '', b35: '', b36: '', b37: '', b38: '',
+    b21: 'Wpawn', b22: 'Wpawn', b23: 'Wpawn', b24: 'Wpawn',
+    b25: 'Wpawn', b26: 'Wpawn', b27: 'Wpawn', b28: 'Wpawn',
+    b11: 'Wrook', b12: 'Wknight', b13: 'Wbishop', b14: 'Wqueen',
+    b15: 'Wking', b16: 'Wbishop', b17: 'Wknight', b18: 'Wrook',
   };
-  
-  Object.keys(pieces).forEach(id => {
+
+  Object.keys(pieces).forEach((id) => {
     const box = document.getElementById(id);
     if (pieces[id]) {
       box.dataset.piece = pieces[id];
@@ -150,73 +160,63 @@ function resetBoard() {
       delete box.dataset.piece;
     }
   });
-  
+
   insertImage();
   coloring();
   createNotations();
-  
+
   currentTurn = 'W';
   lastMovedPawn = null;
   halfMoveClock = 0;
   fullMoveNumber = 1;
   positionHistory = {};
-  castlingRights = { W: { kingSide: true, queenSide: true }, B: { kingSide: true, queenSide: true } };
+  castlingRights = {
+    W: { kingSide: true, queenSide: true },
+    B: { kingSide: true, queenSide: true },
+  };
   selectedPiece = null;
   clearHighlights();
-  
+
   const initialPositionKey = generatePositionKey();
   positionHistory[initialPositionKey] = 1;
 }
 
-
 function flipBoard() {
   const board = document.getElementById('chessBoard');
   const container = document.getElementById('chessBoardContainer');
-  
+
   board.classList.add('flipped');
   container.classList.add('flipped');
-  
-  // Update notasi untuk pemain hitam
+
   updateNotationsForPlayer();
 }
 
 function unflipBoard() {
   const board = document.getElementById('chessBoard');
   const container = document.getElementById('chessBoardContainer');
-  
+
   board.classList.remove('flipped');
   container.classList.remove('flipped');
-  
-  // Update notasi untuk pemain putih
+
   updateNotationsForPlayer();
 }
 
 function createNotations() {
   const rankNotation = document.getElementById('rankNotation');
   const fileNotation = document.getElementById('fileNotation');
-  
-  // Kosongkan dulu
+
   rankNotation.innerHTML = '';
   fileNotation.innerHTML = '';
-  
-  // Buat notasi angka untuk PUTIH: dari atas ke bawah 8,7,6,5,4,3,2,1
-  // Buat notasi angka untuk HITAM: dari atas ke bawah 1,2,3,4,5,6,7,8
-  
-  // Buat notasi huruf untuk PUTIH: dari kiri ke kanan a,b,c,d,e,f,g,h
-  // Buat notasi huruf untuk HITAM: dari kiri ke kanan h,g,f,e,d,c,b,a
-  
-  // Kita akan mengisi dengan urutan default untuk putih
-  // Kemudian updateNotationsForPlayer akan mengubahnya jika diperlukan
-  for (let i = 8; i >= 1; i--) {
+
+  for (let i = 8; i >= 1; i -= 1) {
     const rankItem = document.createElement('div');
     rankItem.className = 'notation-item';
-    rankItem.textContent = i.toString(); // Default untuk putih: 8,7,6,5,4,3,2,1
+    rankItem.textContent = i.toString();
     rankNotation.appendChild(rankItem);
   }
-  
-  // Buat notasi huruf untuk putih: a,b,c,d,e,f,g,h
+
   const files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
-  files.forEach(file => {
+  files.forEach((file) => {
     const fileItem = document.createElement('div');
     fileItem.className = 'notation-item';
     fileItem.textContent = file;
@@ -228,36 +228,30 @@ function updateNotationsForPlayer() {
   const board = document.getElementById('chessBoard');
   const container = document.getElementById('chessBoardContainer');
   const isFlipped = board.classList.contains('flipped');
-  
-  // Update container untuk CSS
+
   if (isFlipped) {
     container.classList.add('flipped');
   } else {
     container.classList.remove('flipped');
   }
-  
-  // Update teks notasi berdasarkan orientasi
+
   const rankItems = document.querySelectorAll('#rankNotation .notation-item');
   const fileItems = document.querySelectorAll('#fileNotation .notation-item');
-  
+
   if (isFlipped) {
-    // Untuk HITAM: angka dari atas ke bawah 1,2,3,4,5,6,7,8
     rankItems.forEach((item, index) => {
       item.textContent = (index + 1).toString();
     });
-    
-    // Untuk HITAM: huruf dari kiri ke kanan h,g,f,e,d,c,b,a
+
     const filesReversed = ['h', 'g', 'f', 'e', 'd', 'c', 'b', 'a'];
     fileItems.forEach((item, index) => {
       item.textContent = filesReversed[index];
     });
   } else {
-    // Untuk PUTIH: angka dari atas ke bawah 8,7,6,5,4,3,2,1
     rankItems.forEach((item, index) => {
       item.textContent = (8 - index).toString();
     });
-    
-    // Untuk PUTIH: huruf dari kiri ke kanan a,b,c,d,e,f,g,h
+
     const files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
     fileItems.forEach((item, index) => {
       item.textContent = files[index];
@@ -266,48 +260,56 @@ function updateNotationsForPlayer() {
 }
 
 function disableBoard() {
-  document.querySelectorAll('.box').forEach(box => {
+  document.querySelectorAll('.box').forEach((box) => {
     box.classList.add('disabled');
   });
 }
 
 function enableBoard() {
-  document.querySelectorAll('.box').forEach(box => {
+  document.querySelectorAll('.box').forEach((box) => {
     box.classList.remove('disabled');
   });
 }
 
 function updateTurnDisplay() {
-  const turnText = currentTurn === playerColor ? 
-    `Your Turn (${playerColor === 'W' ? 'White' : 'Black'})` : 
-    `Computer Thinking...`;
+  const turnText =
+    currentTurn === playerColor
+      ? `Your Turn (${playerColor === 'W' ? 'White' : 'Black'})`
+      : 'Computer Thinking...';
   document.getElementById('tog').innerText = turnText;
 }
 
 function makeComputerMove() {
   if (isGameOver || currentTurn !== computerColor) return;
-  
+
   const move = getComputerMove();
   if (move) {
     const startBox = document.getElementById(move.from);
     const targetBox = document.getElementById(move.to);
-    
+
     if (startBox && targetBox) {
       const pieceType = startBox.dataset.piece;
       const moveStatus = movePiece(startBox, targetBox);
       const promotedPiece = checkComputerPawnPromotion(targetBox);
-      
-      const moveNotation = generateSAN(move.from, move.to, pieceType, moveStatus.isCapture, moveStatus.isCastling, promotedPiece);
+
+      const moveNotation = generateSAN(
+        move.from,
+        move.to,
+        pieceType,
+        moveStatus.isCapture,
+        moveStatus.isCastling,
+        promotedPiece
+      );
       updateMoveLog(moveNotation);
-      
+
       currentTurn = currentTurn === 'W' ? 'B' : 'W';
       updateTurnDisplay();
-      
+
       if (currentTurn === 'W') fullMoveNumber += 1;
-      
+
       const positionKey = generatePositionKey();
       positionHistory[positionKey] = (positionHistory[positionKey] || 0) + 1;
-      
+
       checkForCheckOrCheckmate(positionKey);
     }
   }
@@ -317,14 +319,14 @@ function checkComputerPawnPromotion(box) {
   const piece = box.dataset.piece;
   const row = parseInt(box.id[1], 10);
   let promotedPieceType = null;
-  
+
   if ((piece === 'Wpawn' && row === 8) || (piece === 'Bpawn' && row === 1)) {
     const color = piece[0];
     promotedPieceType = color + 'queen';
     box.dataset.piece = promotedPieceType;
     insertImage();
   }
-  
+
   return promotedPieceType;
 }
 
@@ -357,19 +359,17 @@ function insertImage() {
 }
 
 function coloring() {
-  const boxes = document.querySelectorAll('.box');
-  boxes.forEach((box) => {
-    const getId = box.id;
-    const row = parseInt(getId[1], 10);
-    const col = parseInt(getId[2], 10);
-    
-    if ((row + col) % 2 === 0) {
-      box.style.backgroundColor = 'rgb(125 135 150)';
-    } else {
-      box.style.backgroundColor = 'rgb(233 235 239)';
-    }
+  document.querySelectorAll('.box').forEach((box) => {
+    const row = parseInt(box.id[1], 10);
+    const col = parseInt(box.id[2], 10);
+    box.style.backgroundColor =
+      (row + col) % 2 === 0 ? 'rgb(125 135 150)' : 'rgb(233 235 239)';
   });
 }
+
+/* =========================
+   FEN / POSITION KEY
+========================= */
 
 function generateFEN() {
   let fen = '';
@@ -394,8 +394,7 @@ function generateFEN() {
         else if (piece.includes('knight')) pieceCode = 'N';
         else if (piece.includes('pawn')) pieceCode = 'P';
 
-        if (piece.startsWith('B')) fen += pieceCode.toLowerCase();
-        else fen += pieceCode;
+        fen += piece.startsWith('B') ? pieceCode.toLowerCase() : pieceCode;
       } else {
         empty += 1;
       }
@@ -417,6 +416,7 @@ function generateFEN() {
     const row = parseInt(lastMovedPawn[1], 10);
     const col = parseInt(lastMovedPawn[2], 10);
     let epRow = null;
+
     if (row === 4) epRow = 3;
     else if (row === 5) epRow = 6;
 
@@ -431,7 +431,6 @@ function generateFEN() {
   }
 
   fen += ` ${halfMoveClock} ${fullMoveNumber}`;
-
   return fen.trim();
 }
 
@@ -458,8 +457,7 @@ function generatePositionKey() {
         else if (piece.includes('knight')) pieceCode = 'N';
         else if (piece.includes('pawn')) pieceCode = 'P';
 
-        if (piece.startsWith('B')) fen += pieceCode.toLowerCase();
-        else fen += pieceCode;
+        fen += piece.startsWith('B') ? pieceCode.toLowerCase() : pieceCode;
       } else {
         empty += 1;
       }
@@ -481,6 +479,7 @@ function generatePositionKey() {
     const row = parseInt(lastMovedPawn[1], 10);
     const col = parseInt(lastMovedPawn[2], 10);
     let epRow = null;
+
     if (row === 4) epRow = 3;
     else if (row === 5) epRow = 6;
 
@@ -496,6 +495,10 @@ function generatePositionKey() {
 
   return fen.trim();
 }
+
+/* =========================
+   MOVE EXECUTION
+========================= */
 
 function movePiece(startBox, targetBox) {
   const pieceType = startBox.dataset.piece;
@@ -522,7 +525,7 @@ function movePiece(startBox, targetBox) {
         const rookTarget = document.getElementById(`b${row}6`);
         rookTarget.dataset.piece = rookStart.dataset.piece;
         delete rookStart.dataset.piece;
-      } else if (startCol - targetCol === 2) {
+      } else {
         const rookStart = document.getElementById(`b${row}1`);
         const rookTarget = document.getElementById(`b${row}4`);
         rookTarget.dataset.piece = rookStart.dataset.piece;
@@ -535,11 +538,13 @@ function movePiece(startBox, targetBox) {
     castlingRights[color].kingSide = false;
     castlingRights[color].queenSide = false;
   }
+
   if (pieceType.includes('rook')) {
     const row = color === 'W' ? 1 : 8;
     if (startBox.id === `b${row}8`) castlingRights[color].kingSide = false;
     if (startBox.id === `b${row}1`) castlingRights[color].queenSide = false;
   }
+
   if (isCapture && originalTargetPiece && originalTargetPiece.includes('rook')) {
     const oppColor = color === 'W' ? 'B' : 'W';
     const oppRow = oppColor === 'W' ? 1 : 8;
@@ -551,6 +556,7 @@ function movePiece(startBox, targetBox) {
   delete startBox.dataset.piece;
 
   let isDoubleMove = false;
+
   if (pieceType.includes('pawn')) {
     const startRow = parseInt(startBox.id[1], 10);
     const targetRow = parseInt(targetBox.id[1], 10);
@@ -579,6 +585,10 @@ function movePiece(startBox, targetBox) {
   return { isCapture, isCastling, isEnPassant };
 }
 
+/* =========================
+   MODAL & GAME END
+========================= */
+
 function showModal(message, buttonsHTML) {
   const modal = document.getElementById('gameModal');
   const modalText = document.getElementById('modalText');
@@ -591,8 +601,7 @@ function showModal(message, buttonsHTML) {
 }
 
 function closeModal() {
-  const modal = document.getElementById('gameModal');
-  modal.classList.add('hidden');
+  document.getElementById('gameModal').classList.add('hidden');
   isModalOpen = false;
 }
 
@@ -605,13 +614,18 @@ function endGame(message) {
 
 function showThreefoldChoice() {
   const buttons = `
-      <button class="btn-primary" onclick="endGame('Game Drawn by Agreement (Threefold)')">Accept Draw</button>
-      <button class="btn-neutral" onclick="closeModal()">Continue Playing</button>
-   `;
+    <button class="btn-primary" onclick="endGame('Game Drawn by Agreement (Threefold)')">Accept Draw</button>
+    <button class="btn-neutral" onclick="closeModal()">Continue Playing</button>
+  `;
+
   if (document.getElementById('gameModal').classList.contains('hidden')) {
     showModal('Threefold Repetition Detected! Claim Draw?', buttons);
   }
 }
+
+/* =========================
+   CHECK / CHECKMATE
+========================= */
 
 function checkForCheckOrCheckmate(fenToCheck) {
   const myColor = currentTurn;
@@ -642,11 +656,11 @@ function checkForCheckOrCheckmate(fenToCheck) {
     for (let c = 1; c <= 8; c += 1) {
       const box = document.getElementById(`b${r}${c}`);
       if (box.dataset.piece && box.dataset.piece.startsWith(myColor)) {
-        const moves = getValidMoves(box.dataset.piece, box.id, true); 
+        const moves = getValidMoves(box.dataset.piece, box.id, true);
         if (moves.length > 0) {
           hasLegalMoves = true;
           r = 9;
-          break; 
+          break;
         }
       }
     }
@@ -660,19 +674,20 @@ function checkForCheckOrCheckmate(fenToCheck) {
       const winner = opponentColor === 'W' ? 'White' : 'Black';
       endGame(`CHECKMATE! ${winner} Wins!`);
       return true;
-    } else {
-      updateMoveLog('+', false);
-      warning.innerText = `${myColor === 'W' ? 'White' : 'Black'} is in Check!`;
     }
-  } else {
-    if (!hasLegalMoves) {
-      endGame('Stalemate! Draw.');
-      return true;
-    }
+    updateMoveLog('+', false);
+    warning.innerText = `${myColor === 'W' ? 'White' : 'Black'} is in Check!`;
+  } else if (!hasLegalMoves) {
+    endGame('Stalemate! Draw.');
+    return true;
   }
-  
+
   return false;
 }
+
+/* =========================
+   MOVE HIGHLIGHTING
+========================= */
 
 function highlightValidMoves(pieceBox) {
   clearHighlights();
@@ -693,6 +708,10 @@ function highlightValidMoves(pieceBox) {
 function clearHighlights() {
   coloring();
 }
+
+/* =========================
+   ATTACK & KING POSITION
+========================= */
 
 function getKingPosition(color) {
   for (let i = 1; i <= 8; i += 1) {
@@ -719,6 +738,10 @@ function isPositionUnderAttack(positionId, attackerColor) {
   return false;
 }
 
+/* =========================
+   PROMOTION
+========================= */
+
 function checkPawnPromotion(box) {
   const piece = box.dataset.piece;
   const row = parseInt(box.id[1], 10);
@@ -733,12 +756,15 @@ function checkPawnPromotion(box) {
 
     promotedPieceType = color + valid;
     box.dataset.piece = promotedPieceType;
-
     insertImage();
   }
 
   return promotedPieceType;
 }
+
+/* =========================
+   MOVE GENERATION
+========================= */
 
 function getValidMoves(pieceType, currentPosition, checkSafety = false) {
   let moves = [];
@@ -751,6 +777,7 @@ function getValidMoves(pieceType, currentPosition, checkSafety = false) {
     const box = document.getElementById(`b${r}${c}`);
     return box && box.dataset.piece;
   };
+
   const isOpponent = (r, c) => {
     const box = document.getElementById(`b${r}${c}`);
     return box && box.dataset.piece && box.dataset.piece.startsWith(opponent);
@@ -766,6 +793,7 @@ function getValidMoves(pieceType, currentPosition, checkSafety = false) {
         moves.push(`b${row + direction * 2}${col}`);
       }
     }
+
     [[direction, -1], [direction, 1]].forEach(([rOff, cOff]) => {
       const targetR = row + rOff;
       const targetC = col + cOff;
@@ -779,19 +807,12 @@ function getValidMoves(pieceType, currentPosition, checkSafety = false) {
         }
       }
     });
-  }
-
-  else if (pieceType.includes('knight')) {
+  } else if (pieceType.includes('knight')) {
     const offsets = [
-      [2, 1],
-      [2, -1],
-      [-2, 1],
-      [-2, -1],
-      [1, 2],
-      [1, -2],
-      [-1, 2],
-      [-1, -2],
+      [2, 1], [2, -1], [-2, 1], [-2, -1],
+      [1, 2], [1, -2], [-1, 2], [-1, -2],
     ];
+
     offsets.forEach(([rOff, cOff]) => {
       const r = row + rOff;
       const c = col + cOff;
@@ -802,19 +823,12 @@ function getValidMoves(pieceType, currentPosition, checkSafety = false) {
         }
       }
     });
-  }
-
-  else if (pieceType.includes('king')) {
+  } else if (pieceType.includes('king')) {
     const offsets = [
-      [1, 0],
-      [-1, 0],
-      [0, 1],
-      [0, -1],
-      [1, 1],
-      [1, -1],
-      [-1, 1],
-      [-1, -1],
+      [1, 0], [-1, 0], [0, 1], [0, -1],
+      [1, 1], [1, -1], [-1, 1], [-1, -1],
     ];
+
     offsets.forEach(([rOff, cOff]) => {
       const r = row + rOff;
       const c = col + cOff;
@@ -833,29 +847,34 @@ function getValidMoves(pieceType, currentPosition, checkSafety = false) {
 
         if (castlingRights[color].kingSide) {
           if (!isOccupied(r, 6) && !isOccupied(r, 7)) {
-            if (!isPositionUnderAttack(`b${r}6`, opponent)
-              && !isPositionUnderAttack(`b${r}7`, opponent)) {
+            if (
+              !isPositionUnderAttack(`b${r}6`, opponent) &&
+              !isPositionUnderAttack(`b${r}7`, opponent)
+            ) {
               moves.push(`b${r}7`);
             }
           }
         }
+
         if (castlingRights[color].queenSide) {
           if (!isOccupied(r, 2) && !isOccupied(r, 3) && !isOccupied(r, 4)) {
-            if (!isPositionUnderAttack(`b${r}3`, opponent)
-              && !isPositionUnderAttack(`b${r}4`, opponent)) {
+            if (
+              !isPositionUnderAttack(`b${r}3`, opponent) &&
+              !isPositionUnderAttack(`b${r}4`, opponent)
+            ) {
               moves.push(`b${r}3`);
             }
           }
         }
       }
     }
-  }
-
-  else {
+  } else {
     const directions = [];
+
     if (pieceType.includes('rook') || pieceType.includes('queen')) {
       directions.push([1, 0], [-1, 0], [0, 1], [0, -1]);
     }
+
     if (pieceType.includes('bishop') || pieceType.includes('queen')) {
       directions.push([1, 1], [1, -1], [-1, 1], [-1, -1]);
     }
@@ -902,11 +921,16 @@ function getValidMoves(pieceType, currentPosition, checkSafety = false) {
 
       return !isCheck;
     });
+
     return legalMoves;
   }
 
   return moves;
 }
+
+/* =========================
+   SAN NOTATION
+========================= */
 
 function getPieceSymbol(pieceType) {
   if (pieceType.includes('king')) return 'K';
@@ -954,6 +978,10 @@ function generateSAN(startId, targetId, pieceType, isCapture, isCastling, promot
   return san;
 }
 
+/* =========================
+   MOVE LOG
+========================= */
+
 function updateMoveLog(moveNotation, isFinal = true) {
   const movesList = document.getElementById('movesList');
   const isWhiteMove = currentTurn === 'W';
@@ -966,16 +994,18 @@ function updateMoveLog(moveNotation, isFinal = true) {
       listItem.dataset.fullmove = currentMoveNumber;
       movesList.appendChild(listItem);
     } else {
-      const listItem = Array.from(movesList.children)
-        .find((li) => parseInt(li.dataset.fullmove, 10) === currentMoveNumber);
+      const listItem = Array.from(movesList.children).find(
+        (li) => parseInt(li.dataset.fullmove, 10) === currentMoveNumber
+      );
       if (listItem) {
         listItem.innerText += ` ${moveNotation}`;
       }
     }
   } else {
     const targetFullMove = currentMoveNumber;
-    const listItemToUpdate = Array.from(movesList.children)
-      .find((li) => parseInt(li.dataset.fullmove, 10) === targetFullMove);
+    const listItemToUpdate = Array.from(movesList.children).find(
+      (li) => parseInt(li.dataset.fullmove, 10) === targetFullMove
+    );
 
     if (listItemToUpdate) {
       const currentText = listItemToUpdate.innerText.trim();

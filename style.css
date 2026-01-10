@@ -4,15 +4,15 @@
 * {
   margin: 0;
   padding: 0;
-  box-sizing: border-box; 
+  box-sizing: border-box;
 }
 
 body {
   display: flex;
   flex-direction: column;
-  align-items: center; 
-  justify-content: center; 
-  min-height: 100vh; 
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
   overflow-x: hidden;
   background: url(images/background.jpg);
   position: relative;
@@ -31,11 +31,12 @@ body {
 
 #gameContainer {
   display: flex;
-  flex-direction: row; 
+  flex-direction: row;
   align-items: flex-start;
-  gap: 30px; 
+  gap: 30px;
   transform: translateX(185px);
 }
+
 
 /* =========================================================
    CHESS BOARD CONTAINER
@@ -44,7 +45,7 @@ body {
   display: grid;
   grid-template-columns: 25px 480px;
   grid-template-rows: 480px 25px;
-  grid-template-areas: 
+  grid-template-areas:
     "rank board"
     ". file";
   gap: 0;
@@ -64,7 +65,8 @@ body {
   transform: rotate(180deg);
 }
 
-/* Notasi Container */
+
+/* Notation Container */
 #rankNotation {
   grid-area: rank;
   display: flex;
@@ -93,22 +95,23 @@ body {
   color: #000;
 }
 
-/* Atur urutan notasi dengan CSS saja, tidak perlu JavaScript */
+/* Control notation order using CSS only */
 #chessBoardContainer:not(.flipped) #rankNotation {
-  flex-direction: column; /* Default: dari atas ke bawah 1,2,3,4,5,6,7,8 */
+  flex-direction: column; /* Top to bottom: 1,2,3,4,5,6,7,8 */
 }
 
 #chessBoardContainer.flipped #rankNotation {
-  flex-direction: column; /* Tetap dari atas ke bawah, tapi teksnya 8,7,6,5,4,3,2,1 */
+  flex-direction: column; /* Top to bottom: 8,7,6,5,4,3,2,1 */
 }
 
 #chessBoardContainer:not(.flipped) #fileNotation {
-  flex-direction: row; /* Default: dari kiri ke kanan a,b,c,d,e,f,g,h */
+  flex-direction: row; /* Left to right: a,b,c,d,e,f,g,h */
 }
 
 #chessBoardContainer.flipped #fileNotation {
-  flex-direction: row; /* Tetap dari kiri ke kanan, tapi teksnya h,g,f,e,d,c,b,a */
+  flex-direction: row; /* Left to right: h,g,f,e,d,c,b,a */
 }
+
 
 /* =========================================================
    HEADER / TITLE
@@ -130,9 +133,9 @@ body {
    TURN INDICATOR
 ========================================================= */
 #tog {
-  margin: 0 0 15px 0; 
-  font-size: 1.2rem; 
-  text-align: center; 
+  margin: 0 0 15px 0;
+  font-size: 1.2rem;
+  text-align: center;
   background-color: #fff;
   color: #000;
   border: 2px solid #fff;
@@ -228,7 +231,7 @@ li {
 ========================================================= */
 .box {
   margin: 0.5px;
-  width: 60px; 
+  width: 60px;
   height: 60px;
   box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.9);
   display: flex;
@@ -256,7 +259,7 @@ li {
    CHESS PIECES
 ========================================================= */
 .all-img {
-  width: 50px; 
+  width: 50px;
   height: 50px;
   pointer-events: none;
 }
@@ -276,7 +279,7 @@ li {
   top: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.7); 
+  background-color: rgba(0, 0, 0, 0.7);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -288,22 +291,22 @@ li {
 
 .modal-content {
   background-color: white;
-  padding: 15px; 
+  padding: 15px;
   border-radius: 10px;
   text-align: center;
   border: 3px solid #333;
-  min-width: 250px; 
+  min-width: 250px;
 }
 
 #modalText {
-  margin-bottom: 15px; 
+  margin-bottom: 15px;
   color: #333;
 }
 
 #modalButtons button {
-  padding: 8px 16px; 
-  margin: 4px; 
-  font-size: 14px; 
+  padding: 8px 16px;
+  margin: 4px;
+  font-size: 14px;
   cursor: pointer;
   border: none;
   border-radius: 5px;
@@ -337,12 +340,12 @@ li {
     position: relative;
     top: 0;
     left: 0;
-    margin: 20px auto; 
+    margin: 20px auto;
   }
 
   #gameContainer {
-    transform: translateX(0); 
-    flex-direction: column; 
+    transform: translateX(0);
+    flex-direction: column;
     align-items: center;
     gap: 15px;
   }
@@ -368,12 +371,12 @@ li {
   }
 
   #moveLog {
-    width: 90%; 
-    max-height: 150px; 
+    width: 90%;
+    max-height: 150px;
   }
 
   #reset-btn {
-    width: 150px; 
+    width: 150px;
   }
 
   #tog {
@@ -388,3 +391,6 @@ li {
     padding: 5px;
   }
 }
+
+/* =========================================================
+   END OF STYLE.CSS
