@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>Chess Game</title>
+    <title>Chess Game - Player vs Computer</title>
     <link rel="stylesheet" href="style.css" />
   </head>
 
@@ -11,109 +11,139 @@
     <h1 id="main-title">Chess Game</h1>
 
     <div class="main-content-wrapper">
-      <!-- Modal -->
+      <!-- Game Over Modal -->
       <div id="gameModal" class="modal hidden">
         <div class="modal-content">
           <h2 id="modalText">Game Over</h2>
           <div id="modalButtons"></div>
+          <button id="closeModal" class="btn-neutral" style="margin-top: 10px;">Close</button>
         </div>
       </div>
 
-      <h2 id="tog">White's Turn</h2>
-      <div id="checkWarning" style="color: red; font-weight: bold"></div>
+      <!-- Color Selection Modal -->
+      <div id="colorModal" class="modal">
+        <div class="modal-content">
+          <h2>Choose Your Color</h2>
+          <div id="colorButtons" style="display: flex; flex-direction: column; gap: 10px; margin: 20px 0;">
+            <button id="chooseWhite" class="btn-primary" style="padding: 10px;">Play as White</button>
+            <button id="chooseBlack" class="btn-primary" style="padding: 10px;">Play as Black</button>
+            <button id="chooseRandom" class="btn-neutral" style="padding: 10px;">Random</button>
+          </div>
+        </div>
+      </div>
+
+      <h2 id="tog">Press "New Game" to Start</h2>
+      <div id="checkWarning" style="color: red; font-weight: bold; min-height: 24px;"></div>
 
       <div id="gameContainer">
-        <!-- Chess Board -->
-        <div id="chessBoard">
-          <ul>
-            <div class="div" id="row8">
-              <li class="box" id="b81">Brook</li>
-              <li class="box" id="b82">Bknight</li>
-              <li class="box" id="b83">Bbishop</li>
-              <li class="box" id="b84">Bqueen</li>
-              <li class="box" id="b85">Bking</li>
-              <li class="box" id="b86">Bbishop</li>
-              <li class="box" id="b87">Bknight</li>
-              <li class="box" id="b88">Brook</li>
-            </div>
+        <!-- Chess Board Container -->
+        <div id="chessBoardContainer">
+          <!-- Rank Notation (angka di kiri) -->
+          <div id="rankNotation" class="notation"></div>
+          
+          <!-- Chess Board -->
+          <div id="chessBoard">
+            <ul>
+              <!-- Baris 8 -->
+              <div class="div" id="row8">
+                <li class="box" id="b81">Brook</li>
+                <li class="box" id="b82">Bknight</li>
+                <li class="box" id="b83">Bbishop</li>
+                <li class="box" id="b84">Bqueen</li>
+                <li class="box" id="b85">Bking</li>
+                <li class="box" id="b86">Bbishop</li>
+                <li class="box" id="b87">Bknight</li>
+                <li class="box" id="b88">Brook</li>
+              </div>
 
-            <div class="div" id="row7">
-              <li class="box" id="b71">Bpawn</li>
-              <li class="box" id="b72">Bpawn</li>
-              <li class="box" id="b73">Bpawn</li>
-              <li class="box" id="b74">Bpawn</li>
-              <li class="box" id="b75">Bpawn</li>
-              <li class="box" id="b76">Bpawn</li>
-              <li class="box" id="b77">Bpawn</li>
-              <li class="box" id="b78">Bpawn</li>
-            </div>
+              <!-- Baris 7 -->
+              <div class="div" id="row7">
+                <li class="box" id="b71">Bpawn</li>
+                <li class="box" id="b72">Bpawn</li>
+                <li class="box" id="b73">Bpawn</li>
+                <li class="box" id="b74">Bpawn</li>
+                <li class="box" id="b75">Bpawn</li>
+                <li class="box" id="b76">Bpawn</li>
+                <li class="box" id="b77">Bpawn</li>
+                <li class="box" id="b78">Bpawn</li>
+              </div>
 
-            <div class="div" id="row6">
-              <li class="box" id="b61"></li>
-              <li class="box" id="b62"></li>
-              <li class="box" id="b63"></li>
-              <li class="box" id="b64"></li>
-              <li class="box" id="b65"></li>
-              <li class="box" id="b66"></li>
-              <li class="box" id="b67"></li>
-              <li class="box" id="b68"></li>
-            </div>
+              <!-- Baris 6 -->
+              <div class="div" id="row6">
+                <li class="box" id="b61"></li>
+                <li class="box" id="b62"></li>
+                <li class="box" id="b63"></li>
+                <li class="box" id="b64"></li>
+                <li class="box" id="b65"></li>
+                <li class="box" id="b66"></li>
+                <li class="box" id="b67"></li>
+                <li class="box" id="b68"></li>
+              </div>
 
-            <div class="div" id="row5">
-              <li class="box" id="b51"></li>
-              <li class="box" id="b52"></li>
-              <li class="box" id="b53"></li>
-              <li class="box" id="b54"></li>
-              <li class="box" id="b55"></li>
-              <li class="box" id="b56"></li>
-              <li class="box" id="b57"></li>
-              <li class="box" id="b58"></li>
-            </div>
+              <!-- Baris 5 -->
+              <div class="div" id="row5">
+                <li class="box" id="b51"></li>
+                <li class="box" id="b52"></li>
+                <li class="box" id="b53"></li>
+                <li class="box" id="b54"></li>
+                <li class="box" id="b55"></li>
+                <li class="box" id="b56"></li>
+                <li class="box" id="b57"></li>
+                <li class="box" id="b58"></li>
+              </div>
 
-            <div class="div" id="row4">
-              <li class="box" id="b41"></li>
-              <li class="box" id="b42"></li>
-              <li class="box" id="b43"></li>
-              <li class="box" id="b44"></li>
-              <li class="box" id="b45"></li>
-              <li class="box" id="b46"></li>
-              <li class="box" id="b47"></li>
-              <li class="box" id="b48"></li>
-            </div>
+              <!-- Baris 4 -->
+              <div class="div" id="row4">
+                <li class="box" id="b41"></li>
+                <li class="box" id="b42"></li>
+                <li class="box" id="b43"></li>
+                <li class="box" id="b44"></li>
+                <li class="box" id="b45"></li>
+                <li class="box" id="b46"></li>
+                <li class="box" id="b47"></li>
+                <li class="box" id="b48"></li>
+              </div>
 
-            <div class="div" id="row3">
-              <li class="box" id="b31"></li>
-              <li class="box" id="b32"></li>
-              <li class="box" id="b33"></li>
-              <li class="box" id="b34"></li>
-              <li class="box" id="b35"></li>
-              <li class="box" id="b36"></li>
-              <li class="box" id="b37"></li>
-              <li class="box" id="b38"></li>
-            </div>
+              <!-- Baris 3 -->
+              <div class="div" id="row3">
+                <li class="box" id="b31"></li>
+                <li class="box" id="b32"></li>
+                <li class="box" id="b33"></li>
+                <li class="box" id="b34"></li>
+                <li class="box" id="b35"></li>
+                <li class="box" id="b36"></li>
+                <li class="box" id="b37"></li>
+                <li class="box" id="b38"></li>
+              </div>
 
-            <div class="div" id="row2">
-              <li class="box" id="b21">Wpawn</li>
-              <li class="box" id="b22">Wpawn</li>
-              <li class="box" id="b23">Wpawn</li>
-              <li class="box" id="b24">Wpawn</li>
-              <li class="box" id="b25">Wpawn</li>
-              <li class="box" id="b26">Wpawn</li>
-              <li class="box" id="b27">Wpawn</li>
-              <li class="box" id="b28">Wpawn</li>
-            </div>
+              <!-- Baris 2 -->
+              <div class="div" id="row2">
+                <li class="box" id="b21">Wpawn</li>
+                <li class="box" id="b22">Wpawn</li>
+                <li class="box" id="b23">Wpawn</li>
+                <li class="box" id="b24">Wpawn</li>
+                <li class="box" id="b25">Wpawn</li>
+                <li class="box" id="b26">Wpawn</li>
+                <li class="box" id="b27">Wpawn</li>
+                <li class="box" id="b28">Wpawn</li>
+              </div>
 
-            <div class="div" id="row1">
-              <li class="box" id="b11">Wrook</li>
-              <li class="box" id="b12">Wknight</li>
-              <li class="box" id="b13">Wbishop</li>
-              <li class="box" id="b14">Wqueen</li>
-              <li class="box" id="b15">Wking</li>
-              <li class="box" id="b16">Wbishop</li>
-              <li class="box" id="b17">Wknight</li>
-              <li class="box" id="b18">Wrook</li>
-            </div>
-          </ul>
+              <!-- Baris 1 -->
+              <div class="div" id="row1">
+                <li class="box" id="b11">Wrook</li>
+                <li class="box" id="b12">Wknight</li>
+                <li class="box" id="b13">Wbishop</li>
+                <li class="box" id="b14">Wqueen</li>
+                <li class="box" id="b15">Wking</li>
+                <li class="box" id="b16">Wbishop</li>
+                <li class="box" id="b17">Wknight</li>
+                <li class="box" id="b18">Wrook</li>
+              </div>
+            </ul>
+          </div>
+          
+          <!-- File Notation (huruf di bawah) -->
+          <div id="fileNotation" class="notation"></div>
         </div>
 
         <!-- Move Log -->
@@ -126,6 +156,7 @@
       </div>
     </div>
 
+    <script src="computerMove.js"></script>
     <script src="logic.js"></script>
   </body>
 </html>

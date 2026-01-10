@@ -1,14 +1,333 @@
-/* =========================================================
-   CHESS GAME SCRIPT
-   Author : Ammar Shidqi
-   Purpose: Manage chess game logic, UI, and rules
-========================================================= */
+let selectedPiece = null;
+let currentTurn = 'W';
+let lastMovedPawn = null;
+let halfMoveClock = 0;
+let positionHistory = {};
+let isGameOver = false;
+let isModalOpen = false;
+let isBoardActive = false;
+let playerColor = 'W';
+let computerColor = 'B';
+let castlingRights = { W: { kingSide: true, queenSide: true }, B: { kingSide: true, queenSide: true } };
+let fullMoveNumber = 1;
 
-/* =========================================================
-   1. BOARD INITIALIZATION & DISPLAY
-========================================================= */
+document.addEventListener('DOMContentLoaded', () => {
+  coloring();
+  initializeBoard();
+  createNotations(); 
+  disableBoard();
+  
+  const initialPositionKey = generatePositionKey();
+  positionHistory[initialPositionKey] = 1;
+  
+  setupEventListeners();
+});
 
-// Initialize board from HTML text to data-pieces
+function setupEventListeners() {
+  document.querySelectorAll('.box').forEach((box) => {
+    box.addEventListener('click', handleBoxClick);
+  });
+  
+  document.getElementById('reset-btn').addEventListener('click', startNewGame);
+  document.getElementById('closeModal').addEventListener('click', closeModal);
+  document.getElementById('chooseWhite').addEventListener('click', () => chooseColor('W'));
+  document.getElementById('chooseBlack').addEventListener('click', () => chooseColor('B'));
+  document.getElementById('chooseRandom').addEventListener('click', chooseRandomColor);
+  
+  document.getElementById('gameModal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('gameModal')) {
+      closeModal();
+    }
+  });
+}
+
+function handleBoxClick() {
+  if (!isBoardActive || isGameOver || isModalOpen || currentTurn !== playerColor) return;
+  
+  const isTargetValid = this.style.backgroundColor === 'greenyellow';
+  
+  if (!selectedPiece) {
+    if (this.dataset.piece && this.dataset.piece.startsWith(currentTurn)) {
+      selectedPiece = this;
+      highlightValidMoves(selectedPiece);
+    }
+  } else if (isTargetValid) {
+    const startId = selectedPiece.id;
+    const targetId = this.id;
+    const pieceType = selectedPiece.dataset.piece;
+    
+    const moveStatus = movePiece(selectedPiece, this);
+    const promotedPiece = checkPawnPromotion(this);
+    
+    const moveNotation = generateSAN(startId, targetId, pieceType, moveStatus.isCapture, moveStatus.isCastling, promotedPiece);
+    updateMoveLog(moveNotation);
+    
+    currentTurn = currentTurn === 'W' ? 'B' : 'W';
+    updateTurnDisplay();
+    
+    if (currentTurn === 'W') fullMoveNumber += 1;
+    
+    selectedPiece = null;
+    clearHighlights();
+    
+    const positionKey = generatePositionKey();
+    positionHistory[positionKey] = (positionHistory[positionKey] || 0) + 1;
+    
+    const gameEnded = checkForCheckOrCheckmate(positionKey);
+    
+    if (!gameEnded && currentTurn === computerColor) {
+      setTimeout(makeComputerMove, 500);
+    }
+  } else {
+    selectedPiece = null;
+    clearHighlights();
+  }
+}
+
+function chooseColor(color) {
+  playerColor = color;
+  computerColor = color === 'W' ? 'B' : 'W';
+  document.getElementById('colorModal').classList.add('hidden');
+  initializeGame();
+}
+
+function chooseRandomColor() {
+  const colors = ['W', 'B'];
+  const randomColor = colors[Math.floor(Math.random() * colors.length)];
+  chooseColor(randomColor);
+}
+
+function startNewGame() {
+  document.getElementById('colorModal').classList.remove('hidden');
+  document.getElementById('gameModal').classList.add('hidden');
+  document.getElementById('movesList').innerHTML = '';
+  document.getElementById('checkWarning').innerText = '';
+  isGameOver = false;
+  isBoardActive = false;
+  disableBoard();
+  document.getElementById('tog').innerText = "Choose your color";
+}
+
+function initializeGame() {
+  resetBoard();
+  
+  if (playerColor === 'B') {
+    flipBoard();
+    currentTurn = 'W';
+    updateTurnDisplay();
+    setTimeout(makeComputerMove, 500);
+  } else {
+    unflipBoard();
+    currentTurn = 'W';
+    updateTurnDisplay();
+  }
+  
+  isBoardActive = true;
+  enableBoard();
+}
+
+function resetBoard() {
+  const pieces = {
+    'b81': 'Brook', 'b82': 'Bknight', 'b83': 'Bbishop', 'b84': 'Bqueen',
+    'b85': 'Bking', 'b86': 'Bbishop', 'b87': 'Bknight', 'b88': 'Brook',
+    'b71': 'Bpawn', 'b72': 'Bpawn', 'b73': 'Bpawn', 'b74': 'Bpawn',
+    'b75': 'Bpawn', 'b76': 'Bpawn', 'b77': 'Bpawn', 'b78': 'Bpawn',
+    'b61': '', 'b62': '', 'b63': '', 'b64': '', 'b65': '', 'b66': '', 'b67': '', 'b68': '',
+    'b51': '', 'b52': '', 'b53': '', 'b54': '', 'b55': '', 'b56': '', 'b57': '', 'b58': '',
+    'b41': '', 'b42': '', 'b43': '', 'b44': '', 'b45': '', 'b46': '', 'b47': '', 'b48': '',
+    'b31': '', 'b32': '', 'b33': '', 'b34': '', 'b35': '', 'b36': '', 'b37': '', 'b38': '',
+    'b21': 'Wpawn', 'b22': 'Wpawn', 'b23': 'Wpawn', 'b24': 'Wpawn',
+    'b25': 'Wpawn', 'b26': 'Wpawn', 'b27': 'Wpawn', 'b28': 'Wpawn',
+    'b11': 'Wrook', 'b12': 'Wknight', 'b13': 'Wbishop', 'b14': 'Wqueen',
+    'b15': 'Wking', 'b16': 'Wbishop', 'b17': 'Wknight', 'b18': 'Wrook'
+  };
+  
+  Object.keys(pieces).forEach(id => {
+    const box = document.getElementById(id);
+    if (pieces[id]) {
+      box.dataset.piece = pieces[id];
+    } else {
+      delete box.dataset.piece;
+    }
+  });
+  
+  insertImage();
+  coloring();
+  createNotations();
+  
+  currentTurn = 'W';
+  lastMovedPawn = null;
+  halfMoveClock = 0;
+  fullMoveNumber = 1;
+  positionHistory = {};
+  castlingRights = { W: { kingSide: true, queenSide: true }, B: { kingSide: true, queenSide: true } };
+  selectedPiece = null;
+  clearHighlights();
+  
+  const initialPositionKey = generatePositionKey();
+  positionHistory[initialPositionKey] = 1;
+}
+
+
+function flipBoard() {
+  const board = document.getElementById('chessBoard');
+  const container = document.getElementById('chessBoardContainer');
+  
+  board.classList.add('flipped');
+  container.classList.add('flipped');
+  
+  // Update notasi untuk pemain hitam
+  updateNotationsForPlayer();
+}
+
+function unflipBoard() {
+  const board = document.getElementById('chessBoard');
+  const container = document.getElementById('chessBoardContainer');
+  
+  board.classList.remove('flipped');
+  container.classList.remove('flipped');
+  
+  // Update notasi untuk pemain putih
+  updateNotationsForPlayer();
+}
+
+function createNotations() {
+  const rankNotation = document.getElementById('rankNotation');
+  const fileNotation = document.getElementById('fileNotation');
+  
+  // Kosongkan dulu
+  rankNotation.innerHTML = '';
+  fileNotation.innerHTML = '';
+  
+  // Buat notasi angka untuk PUTIH: dari atas ke bawah 8,7,6,5,4,3,2,1
+  // Buat notasi angka untuk HITAM: dari atas ke bawah 1,2,3,4,5,6,7,8
+  
+  // Buat notasi huruf untuk PUTIH: dari kiri ke kanan a,b,c,d,e,f,g,h
+  // Buat notasi huruf untuk HITAM: dari kiri ke kanan h,g,f,e,d,c,b,a
+  
+  // Kita akan mengisi dengan urutan default untuk putih
+  // Kemudian updateNotationsForPlayer akan mengubahnya jika diperlukan
+  for (let i = 8; i >= 1; i--) {
+    const rankItem = document.createElement('div');
+    rankItem.className = 'notation-item';
+    rankItem.textContent = i.toString(); // Default untuk putih: 8,7,6,5,4,3,2,1
+    rankNotation.appendChild(rankItem);
+  }
+  
+  // Buat notasi huruf untuk putih: a,b,c,d,e,f,g,h
+  const files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+  files.forEach(file => {
+    const fileItem = document.createElement('div');
+    fileItem.className = 'notation-item';
+    fileItem.textContent = file;
+    fileNotation.appendChild(fileItem);
+  });
+}
+
+function updateNotationsForPlayer() {
+  const board = document.getElementById('chessBoard');
+  const container = document.getElementById('chessBoardContainer');
+  const isFlipped = board.classList.contains('flipped');
+  
+  // Update container untuk CSS
+  if (isFlipped) {
+    container.classList.add('flipped');
+  } else {
+    container.classList.remove('flipped');
+  }
+  
+  // Update teks notasi berdasarkan orientasi
+  const rankItems = document.querySelectorAll('#rankNotation .notation-item');
+  const fileItems = document.querySelectorAll('#fileNotation .notation-item');
+  
+  if (isFlipped) {
+    // Untuk HITAM: angka dari atas ke bawah 1,2,3,4,5,6,7,8
+    rankItems.forEach((item, index) => {
+      item.textContent = (index + 1).toString();
+    });
+    
+    // Untuk HITAM: huruf dari kiri ke kanan h,g,f,e,d,c,b,a
+    const filesReversed = ['h', 'g', 'f', 'e', 'd', 'c', 'b', 'a'];
+    fileItems.forEach((item, index) => {
+      item.textContent = filesReversed[index];
+    });
+  } else {
+    // Untuk PUTIH: angka dari atas ke bawah 8,7,6,5,4,3,2,1
+    rankItems.forEach((item, index) => {
+      item.textContent = (8 - index).toString();
+    });
+    
+    // Untuk PUTIH: huruf dari kiri ke kanan a,b,c,d,e,f,g,h
+    const files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+    fileItems.forEach((item, index) => {
+      item.textContent = files[index];
+    });
+  }
+}
+
+function disableBoard() {
+  document.querySelectorAll('.box').forEach(box => {
+    box.classList.add('disabled');
+  });
+}
+
+function enableBoard() {
+  document.querySelectorAll('.box').forEach(box => {
+    box.classList.remove('disabled');
+  });
+}
+
+function updateTurnDisplay() {
+  const turnText = currentTurn === playerColor ? 
+    `Your Turn (${playerColor === 'W' ? 'White' : 'Black'})` : 
+    `Computer Thinking...`;
+  document.getElementById('tog').innerText = turnText;
+}
+
+function makeComputerMove() {
+  if (isGameOver || currentTurn !== computerColor) return;
+  
+  const move = getComputerMove();
+  if (move) {
+    const startBox = document.getElementById(move.from);
+    const targetBox = document.getElementById(move.to);
+    
+    if (startBox && targetBox) {
+      const pieceType = startBox.dataset.piece;
+      const moveStatus = movePiece(startBox, targetBox);
+      const promotedPiece = checkComputerPawnPromotion(targetBox);
+      
+      const moveNotation = generateSAN(move.from, move.to, pieceType, moveStatus.isCapture, moveStatus.isCastling, promotedPiece);
+      updateMoveLog(moveNotation);
+      
+      currentTurn = currentTurn === 'W' ? 'B' : 'W';
+      updateTurnDisplay();
+      
+      if (currentTurn === 'W') fullMoveNumber += 1;
+      
+      const positionKey = generatePositionKey();
+      positionHistory[positionKey] = (positionHistory[positionKey] || 0) + 1;
+      
+      checkForCheckOrCheckmate(positionKey);
+    }
+  }
+}
+
+function checkComputerPawnPromotion(box) {
+  const piece = box.dataset.piece;
+  const row = parseInt(box.id[1], 10);
+  let promotedPieceType = null;
+  
+  if ((piece === 'Wpawn' && row === 8) || (piece === 'Bpawn' && row === 1)) {
+    const color = piece[0];
+    promotedPieceType = color + 'queen';
+    box.dataset.piece = promotedPieceType;
+    insertImage();
+  }
+  
+  return promotedPieceType;
+}
+
 function initializeBoard() {
   document.querySelectorAll('.box').forEach((box) => {
     const text = box.innerText.trim();
@@ -20,7 +339,6 @@ function initializeBoard() {
   insertImage();
 }
 
-// Display piece images based on data-pieces
 function insertImage() {
   document.querySelectorAll('.box').forEach((box) => {
     box.innerHTML = '';
@@ -38,153 +356,24 @@ function insertImage() {
   });
 }
 
-// Color the chessboard (alternating black-white)
 function coloring() {
   const boxes = document.querySelectorAll('.box');
   boxes.forEach((box) => {
     const getId = box.id;
-    const arr = Array.from(getId);
-    arr.shift();
-    const aside = eval(arr.pop());
-    const aup = eval(arr.shift());
-    const a = aside + aup;
-
-    if (a % 2 === 0) {
-      box.style.backgroundColor = 'rgb(233 235 239)';
-    } else {
+    const row = parseInt(getId[1], 10);
+    const col = parseInt(getId[2], 10);
+    
+    if ((row + col) % 2 === 0) {
       box.style.backgroundColor = 'rgb(125 135 150)';
+    } else {
+      box.style.backgroundColor = 'rgb(233 235 239)';
     }
   });
 }
 
-// Add rank (1–8) and file (a–h) notation
-function addBoardNotation() {
-  const files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
-
-  for (let r = 1; r <= 8; r += 1) {
-    for (let c = 1; c <= 8; c += 1) {
-      const box = document.getElementById(`b${r}${c}`);
-
-      // Numbers only in the first column
-      if (c === 1) {
-        box.setAttribute('data-rank', r);
-      } else {
-        box.removeAttribute('data-rank');
-      }
-
-      // Files only on the first row
-      if (r === 1) {
-        box.setAttribute('data-file', files[c - 1]);
-      } else {
-        box.removeAttribute('data-file');
-      }
-    }
-  }
-}
-
-/* =========================================================
-   2. GLOBAL GAME STATE
-========================================================= */
-
-let selectedPiece = null;
-let currentTurn = 'W';
-let lastMovedPawn = null;
-let halfMoveClock = 0;
-let positionHistory = {};
-let isGameOver = false;
-let isModalOpen = false;
-
-let castlingRights = {
-  W: { kingSide: true, queenSide: true },
-  B: { kingSide: true, queenSide: true },
-};
-
-let fullMoveNumber = 1;
-
-/* =========================================================
-   3. GAME INITIALIZATION
-========================================================= */
-
-coloring();
-initializeBoard();
-addBoardNotation();
-
-// Record initial position for repetition rule
-const initialPositionKey = generatePositionKey();
-positionHistory[initialPositionKey] = 1;
-
-/* =========================================================
-   4. EVENT LISTENER (CLICK ON BOARD)
-========================================================= */
-
-document.querySelectorAll('.box').forEach((box) => {
-  box.addEventListener('click', () => {
-    if (isGameOver || isModalOpen) return; // Board is locked when game is over / modal active
-
-    const isTargetValid = box.style.backgroundColor === 'greenyellow';
-
-    // Select piece
-    if (selectedPiece === null) {
-      if (box.dataset.piece && box.dataset.piece.startsWith(currentTurn)) {
-        selectedPiece = box;
-        highlightValidMoves(selectedPiece);
-      }
-    }
-    // Move piece
-    else if (isTargetValid) {
-      const startId = selectedPiece.id;
-      const targetId = box.id;
-      const pieceType = selectedPiece.dataset.piece;
-
-      const moveStatus = movePiece(selectedPiece, box);
-      const promotedPiece = checkPawnPromotion(box);
-
-      const moveNotation = generateSAN(
-        startId,
-        targetId,
-        pieceType,
-        moveStatus.isCapture,
-        moveStatus.isCastling,
-        promotedPiece,
-      );
-      updateMoveLog(moveNotation);
-
-      // Switch turn
-      currentTurn = currentTurn === 'W' ? 'B' : 'W';
-      document.getElementById('tog').innerText = currentTurn === 'W'
-        ? "White's Turn"
-        : "Black's Turn";
-
-      if (currentTurn === 'W') {
-        fullMoveNumber += 1;
-      }
-
-      selectedPiece = null;
-      clearHighlights();
-
-      // Save position for repetition rule
-      const positionKey = generatePositionKey();
-      positionHistory[positionKey] = (positionHistory[positionKey] || 0) + 1;
-
-      checkForCheckOrCheckmate(positionKey);
-    }
-    // Click on invalid square
-    else {
-      selectedPiece = null;
-      clearHighlights();
-    }
-  });
-});
-
-/* =========================================================
-   5. FEN & POSITION KEY GENERATION
-========================================================= */
-
-// Generate full FEN
 function generateFEN() {
   let fen = '';
 
-  // 1. Piece positions
   for (let r = 8; r >= 1; r -= 1) {
     let empty = 0;
     for (let c = 1; c <= 8; c += 1) {
@@ -215,10 +404,8 @@ function generateFEN() {
     if (r > 1) fen += '/';
   }
 
-  // 2. Turn
   fen += ` ${currentTurn === 'W' ? 'w' : 'b'}`;
 
-  // 3. Castling Rights
   let castlingString = '';
   if (castlingRights.W.kingSide) castlingString += 'K';
   if (castlingRights.W.queenSide) castlingString += 'Q';
@@ -226,7 +413,6 @@ function generateFEN() {
   if (castlingRights.B.queenSide) castlingString += 'q';
   fen += ` ${castlingString || '-'}`;
 
-  // 4. En Passant
   if (lastMovedPawn) {
     const row = parseInt(lastMovedPawn[1], 10);
     const col = parseInt(lastMovedPawn[2], 10);
@@ -244,13 +430,11 @@ function generateFEN() {
     fen += ' -';
   }
 
-  // 5. Clocks
   fen += ` ${halfMoveClock} ${fullMoveNumber}`;
 
   return fen.trim();
 }
 
-// Generate position key (for repetition, without clocks)
 function generatePositionKey() {
   let fen = '';
 
@@ -313,10 +497,6 @@ function generatePositionKey() {
   return fen.trim();
 }
 
-/* =========================================================
-   6. MOVE EXECUTION LOGIC
-========================================================= */
-
 function movePiece(startBox, targetBox) {
   const pieceType = startBox.dataset.piece;
   const originalTargetPiece = targetBox.dataset.piece;
@@ -329,7 +509,6 @@ function movePiece(startBox, targetBox) {
   if (isPawnMove || isCapture) halfMoveClock = 0;
   else halfMoveClock += 1;
 
-  // Castling: move the rook
   if (pieceType.includes('king')) {
     const startCol = parseInt(startBox.id[2], 10);
     const targetCol = parseInt(targetBox.id[2], 10);
@@ -339,13 +518,11 @@ function movePiece(startBox, targetBox) {
       isCastling = true;
 
       if (targetCol - startCol === 2) {
-        // Kingside
         const rookStart = document.getElementById(`b${row}8`);
         const rookTarget = document.getElementById(`b${row}6`);
         rookTarget.dataset.piece = rookStart.dataset.piece;
         delete rookStart.dataset.piece;
       } else if (startCol - targetCol === 2) {
-        // Queenside
         const rookStart = document.getElementById(`b${row}1`);
         const rookTarget = document.getElementById(`b${row}4`);
         rookTarget.dataset.piece = rookStart.dataset.piece;
@@ -354,7 +531,6 @@ function movePiece(startBox, targetBox) {
     }
   }
 
-  // Update castling rights
   if (pieceType.includes('king')) {
     castlingRights[color].kingSide = false;
     castlingRights[color].queenSide = false;
@@ -371,11 +547,9 @@ function movePiece(startBox, targetBox) {
     if (targetBox.id === `b${oppRow}1`) castlingRights[oppColor].queenSide = false;
   }
 
-  // Move piece
   targetBox.dataset.piece = pieceType;
   delete startBox.dataset.piece;
 
-  // Pawn logic (double move & en passant)
   let isDoubleMove = false;
   if (pieceType.includes('pawn')) {
     const startRow = parseInt(startBox.id[1], 10);
@@ -404,10 +578,6 @@ function movePiece(startBox, targetBox) {
   insertImage();
   return { isCapture, isCastling, isEnPassant };
 }
-
-/* =========================================================
-   7. UI / MODAL HANDLING
-========================================================= */
 
 function showModal(message, buttonsHTML) {
   const modal = document.getElementById('gameModal');
@@ -443,10 +613,6 @@ function showThreefoldChoice() {
   }
 }
 
-/* =========================================================
-   8. CHECK / CHECKMATE / DRAW LOGIC
-========================================================= */
-
 function checkForCheckOrCheckmate(fenToCheck) {
   const myColor = currentTurn;
   const opponentColor = myColor === 'W' ? 'B' : 'W';
@@ -455,24 +621,21 @@ function checkForCheckOrCheckmate(fenToCheck) {
 
   warning.innerText = '';
 
-  // Fivefold repetition
   if (positionHistory[fenToCheck] >= 5) {
     endGame('Draw by Fivefold Repetition!');
-    return;
+    return true;
   }
 
-  // 50-move rule
   if (halfMoveClock >= 100) {
     endGame('Draw by 50-Move Rule!');
-    return;
+    return true;
   }
 
-  // Threefold repetition (optional draw)
   if (positionHistory[fenToCheck] >= 3 && !isModalOpen) {
     showThreefoldChoice();
+    return false;
   }
 
-  
   let hasLegalMoves = false;
 
   for (let r = 1; r <= 8; r += 1) {
@@ -494,7 +657,9 @@ function checkForCheckOrCheckmate(fenToCheck) {
   if (isMyKingChecked) {
     if (!hasLegalMoves) {
       updateMoveLog('#', false);
-      endGame(`CHECKMATE! ${opponentColor === 'W' ? 'White' : 'Black'} Wins!`);
+      const winner = opponentColor === 'W' ? 'White' : 'Black';
+      endGame(`CHECKMATE! ${winner} Wins!`);
+      return true;
     } else {
       updateMoveLog('+', false);
       warning.innerText = `${myColor === 'W' ? 'White' : 'Black'} is in Check!`;
@@ -502,13 +667,12 @@ function checkForCheckOrCheckmate(fenToCheck) {
   } else {
     if (!hasLegalMoves) {
       endGame('Stalemate! Draw.');
+      return true;
     }
   }
+  
+  return false;
 }
-
-/* =========================================================
-   9. HIGHLIGHT & HELPER FUNCTIONS
-========================================================= */
 
 function highlightValidMoves(pieceBox) {
   clearHighlights();
@@ -542,7 +706,6 @@ function getKingPosition(color) {
   return null;
 }
 
-// Check king safety
 function isPositionUnderAttack(positionId, attackerColor) {
   for (let i = 1; i <= 8; i += 1) {
     for (let j = 1; j <= 8; j += 1) {
@@ -555,10 +718,6 @@ function isPositionUnderAttack(positionId, attackerColor) {
   }
   return false;
 }
-
-/* =========================================================
-   10. PAWN PROMOTION
-========================================================= */
 
 function checkPawnPromotion(box) {
   const piece = box.dataset.piece;
@@ -581,10 +740,6 @@ function checkPawnPromotion(box) {
   return promotedPieceType;
 }
 
-/* =========================================================
-   11. MOVE GENERATION (RULE ENGINE)
-========================================================= */
-
 function getValidMoves(pieceType, currentPosition, checkSafety = false) {
   let moves = [];
   const row = parseInt(currentPosition[1], 10);
@@ -601,7 +756,6 @@ function getValidMoves(pieceType, currentPosition, checkSafety = false) {
     return box && box.dataset.piece && box.dataset.piece.startsWith(opponent);
   };
 
-  // Pawn
   if (pieceType.includes('pawn')) {
     const direction = color === 'W' ? 1 : -1;
     const startRow = color === 'W' ? 2 : 7;
@@ -627,7 +781,6 @@ function getValidMoves(pieceType, currentPosition, checkSafety = false) {
     });
   }
 
-  // Knight
   else if (pieceType.includes('knight')) {
     const offsets = [
       [2, 1],
@@ -651,7 +804,6 @@ function getValidMoves(pieceType, currentPosition, checkSafety = false) {
     });
   }
 
-  // King (normal + castling)
   else if (pieceType.includes('king')) {
     const offsets = [
       [1, 0],
@@ -699,7 +851,6 @@ function getValidMoves(pieceType, currentPosition, checkSafety = false) {
     }
   }
 
-  // Rook, Bishop, Queen (sliding pieces)
   else {
     const directions = [];
     if (pieceType.includes('rook') || pieceType.includes('queen')) {
@@ -727,7 +878,6 @@ function getValidMoves(pieceType, currentPosition, checkSafety = false) {
     });
   }
 
-  // Check king safety
   if (checkSafety) {
     const legalMoves = moves.filter((moveId) => {
       const startBox = document.getElementById(currentPosition);
@@ -757,10 +907,6 @@ function getValidMoves(pieceType, currentPosition, checkSafety = false) {
 
   return moves;
 }
-
-/* =========================================================
-   12. SAN NOTATION & MOVE LOG
-========================================================= */
 
 function getPieceSymbol(pieceType) {
   if (pieceType.includes('king')) return 'K';
@@ -843,11 +989,3 @@ function updateMoveLog(moveNotation, isFinal = true) {
 
   movesList.scrollTop = movesList.scrollHeight;
 }
-
-/* =========================================================
-   13. RESET BUTTON
-========================================================= */
-
-document.getElementById('reset-btn').addEventListener('click', () => {
-  location.reload();
-});

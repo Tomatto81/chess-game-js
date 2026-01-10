@@ -1,27 +1,43 @@
-# ♟️ JavaScript Chess Game
+# ♟️ JavaScript Chess Game - Player vs Computer
 
-This project is a complete implementation of a standard chess game using HTML, CSS, and pure Vanilla JavaScript. The game incorporates nearly all official chess rules, making it a robust platform for understanding complex game logic.
-
+This project is a complete implementation of a standard chess game using HTML, CSS, and pure Vanilla JavaScript. The game now features Player vs Computer mode.
 
 ## ✨ Key Features
 
-This chess game is built with a strong focus on accurate rule implementation:
+* **Player vs Computer Mode**: Play against an AI opponent
+* **Color Selection**: Choose to play as White, Black, or Random
+* **Board Rotation**: When playing as Black, the board automatically rotates
+* **Computer AI**: Basic AI that makes legal moves with simple strategy
+* **All Standard Chess Rules**:
+    * Complete piece movement rules
+    * En Passant capture
+    * Castling (both sides)
+    * Pawn promotion
+    * Check, Checkmate, and Stalemate detection
+    * Draw rules: Threefold/Fivefold repetition, 50-move rule
+* **Move History**: Complete move log with Standard Algebraic Notation
 
-* **Core Logic:** Full movement implementation for all pieces (King, Queen, Rook, Bishop, Knight, Pawn).
-* **Advanced Chess Rules:**
-    * **En Passant:** Complete logic for the En Passant capture, including tracking the last moved pawn.
-    * **Castling:** Valid King and Rook movement for both Kingside (`O-O`) and Queenside (`O-O-O`), including safety checks (cannot move through or land on an attacked square).
-    * **Pawn Promotion:** Mechanism allowing pawns reaching the last rank to promote to a Queen, Rook, Bishop, or Knight (currently uses a `prompt()` UI).
-* **Game Conditions:**
-    * **Check & Checkmate:** Detection and display for the King being in 'Check' and 'Checkmate'.
-    * **Stalemate:** Detection of a 'Stalemate' resulting in a Draw.
-    * **Draw Rules:** Implementation for Draws via **Threefold Repetition** (claimable) and **Fivefold Repetition** (automatic Draw).
-    * **50-Move Rule:** Automatic Draw detection after 100 half-moves (50 full moves) without a pawn move or capture.
-* **Notation:** Generates Standard Algebraic Notation (SAN) for every move played.
-* **UI/UX:** Highlights valid destination squares and indicates the current turn.
+## 🎮 How to Play
+
+1. Click "New Game" button
+2. Choose your color (White, Black, or Random)
+3. White always moves first
+4. Click on your piece to select it, then click on a highlighted square to move
+5. The computer will automatically make its move after yours
+6. When the game ends, click "Close" to view move history or "New Game" to play again
 
 ## 🛠️ Technologies Used
 
-* **HTML5:** Main structure for the chessboard and game elements.
-* **CSS3:** Styling for the board, pieces, and a responsive layout.
-* **JavaScript (ES6+):** All game logic, move generation, rule validation, and state management.
+* **HTML5**: Game structure and board layout
+* **CSS3**: Styling, animations, and responsive design
+* **JavaScript (ES6+)**: Game logic, AI, and state management
+* **Pure Vanilla JS**: No external libraries or frameworks
+
+## 📁 File Structure
+
+* `index.html` - Main HTML file
+* `style.css` - Styling and responsive design
+* `logic.js` - Main game logic and player interaction
+* `computerMove.js` - Computer AI logic
+* `images/` - Chess piece images
+* `README.md` - This documentation
