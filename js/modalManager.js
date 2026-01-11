@@ -35,7 +35,7 @@ function showPromotionModal(pieceColor, callback) {
     button.dataset.piece = piece.type;
     
     button.innerHTML = `
-      <img src="../images/${pieceColor}${piece.type}.png" 
+      <img src="images/${pieceColor}${piece.type}.png" 
            alt="${piece.name}" 
            class="all-img"
            style="width: 40px; height: 40px; margin-bottom: 5px;">
