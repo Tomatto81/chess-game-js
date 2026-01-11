@@ -14,7 +14,7 @@ body {
   justify-content: center;
   min-height: 100vh;
   overflow-x: hidden;
-  background: url(../images/background.jpg);
+  background: url(images/background.jpg);
   position: relative;
 }
 

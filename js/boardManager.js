@@ -17,7 +17,7 @@ function insertImage() {
     if (box.dataset.piece) {
       const pieceType = box.dataset.piece;
       const img = document.createElement('img');
-      img.src = `../images/${pieceType}.png`;
+      img.src = `images/${pieceType}.png`;
       img.className = 'all-img';
       img.alt = pieceType;
       box.appendChild(img);
