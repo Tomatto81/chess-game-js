@@ -35,9 +35,8 @@ This project is a complete implementation of a standard chess game using HTML, C
 
 ## 📁 File Structure
 
-* `html/index.html` - Main HTML file
-* `css/style.css` - Styling and responsive design
-* `js/main.js` - Main game logic and player interaction
-* `js/computerMove.js` - Computer AI logic
+* `index.html` - Main HTML file
+* `style.css` - Styling and responsive design
+* `js/` - Main game logic and player interaction
 * `images/` - Chess piece images
 * `README.md` - This documentation
